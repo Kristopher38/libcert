@@ -1,10 +1,9 @@
-local expect = require "system.expect"
 local chain = require "chain"
 local container = require "container"
 local crypto = require "crypto"
 local csr = require "csr"
 local signature = require "signature"
-local util = require "cert.util"
+local util = require "util"
 local random = require "ccryptolib.random"
 
 local libcert = {
@@ -20,7 +19,7 @@ local libcert = {
 ---@return string key The generated private key
 ---@return string pk8 The PEM-encoded PKCS#8 key container for the key
 function libcert.generatePrivateKeyForSigning(password)
-    expect(1, password, "string", "nil")
+    checkArg(1, password, "string", "nil")
     local key = random.random(32)
     ---@type PKCS8
     local pk8 = {
@@ -38,7 +37,7 @@ end
 ---@return string key The generated private key
 ---@return string pk8 The PEM-encoded PKCS#8 key container for the key
 function libcert.generatePrivateKeyForEncryption(password)
-    expect(1, password, "string", "nil")
+    checkArg(1, password, "string", "nil")
     local key = random.random(32)
     ---@type PKCS8
     local pk8 = {
@@ -64,9 +63,9 @@ local stringNameValues = {
 ---@param password? string The password protecting the private key, if required
 ---@return string pk10 The PEM-encoded PKCS#10 CSR container
 function libcert.generateCSR(pk8, name, password)
-    expect(1, pk8, "string")
-    expect(2, name, "table")
-    expect(3, password, "string", "nil")
+    checkArg(1, pk8, "string")
+    checkArg(2, name, "table")
+    checkArg(3, password, "string", "nil")
     local der, typ = container.decodePEM(pk8)
     if typ == "ENCRYPTED PRIVATE KEY" then
         if not password then error("Private key is encrypted, but no password was provided", 2) end
@@ -95,12 +94,12 @@ end
 ---@param password? string The password protecting the private key, if required
 ---@return string outcert The new PEM-encoded X.509 certificate for the request
 function libcert.signCSR(pk10, cert, pk8, serialNumber, days, password)
-    expect(1, pk10, "string")
-    expect(2, cert, "string")
-    expect(3, pk8, "string")
-    expect(4, serialNumber, "number", "string")
-    expect(5, days, "number")
-    expect(6, password, "string", "nil")
+    checkArg(1, pk10, "string")
+    checkArg(2, cert, "string")
+    checkArg(3, pk8, "string")
+    checkArg(4, serialNumber, "number", "string")
+    checkArg(5, days, "number")
+    checkArg(6, password, "string", "nil")
     local der, typ = container.decodePEM(pk8)
     if typ == "ENCRYPTED PRIVATE KEY" then
         if not password then error("Private key is encrypted, but no password was provided", 2) end
@@ -128,11 +127,11 @@ end
 ---@param password? string The password protecting the private key, if required
 ---@return string outcert The new PEM-encoded X.509 certificate for the request
 function libcert.selfSignCSR(pk10, pk8, serialNumber, days, password)
-    expect(1, pk10, "string")
-    expect(2, pk8, "string")
-    expect(3, serialNumber, "number", "string")
-    expect(4, days, "number")
-    expect(5, password, "string", "nil")
+    checkArg(1, pk10, "string")
+    checkArg(2, pk8, "string")
+    checkArg(3, serialNumber, "number", "string")
+    checkArg(4, days, "number")
+    checkArg(5, password, "string", "nil")
     local der, typ = container.decodePEM(pk8)
     if typ == "ENCRYPTED PRIVATE KEY" then
         if not password then error("Private key is encrypted, but no password was provided", 2) end
@@ -156,8 +155,8 @@ end
 ---@param password string The password to encrypt with
 ---@return string pk7 A PEM-encoded PKCS#7/CMS container with the encrypted data
 function libcert.encrypt(data, password)
-    expect(1, data, "string")
-    expect(2, password, "string")
+    checkArg(1, data, "string")
+    checkArg(2, password, "string")
     return container.encodePEM(container.savePKCS7(crypto.encrypt(data, crypto.passwordKey(password))), "CMS")
 end
 
@@ -166,8 +165,8 @@ end
 ---@param password string The password to decrypt with
 ---@return string data The decrypted data
 function libcert.decrypt(data, password)
-    expect(1, data, "string")
-    expect(2, password, "string")
+    checkArg(1, data, "string")
+    checkArg(2, password, "string")
     return crypto.decrypt(container.loadPKCS7(container.decodePEM(data)), crypto.passwordKey(password))
 end
 
@@ -179,11 +178,11 @@ end
 ---@param password? string The password protecting the private key, if required
 ---@return string pk7 A PEM-encoded PKCS#7/CMS container with the encrypted data
 function libcert.encryptExchange(data, myKey, myCert, theirCert, password)
-    expect(1, data, "string")
-    expect(2, myKey, "string")
-    expect(3, myCert, "string")
-    expect(4, theirCert, "string")
-    expect(5, password, "string", "nil")
+    checkArg(1, data, "string")
+    checkArg(2, myKey, "string")
+    checkArg(3, myCert, "string")
+    checkArg(4, theirCert, "string")
+    checkArg(5, password, "string", "nil")
     local pk8, typ = container.decodePEM(myKey)
     if typ == "ENCRYPTED PRIVATE KEY" then
         if not password then error("Private key is encrypted, but no password was provided", 2) end
@@ -200,11 +199,11 @@ end
 ---@param password? string The password protecting the private key, if required
 ---@return string data The decrypted data
 function libcert.decryptExchange(data, myKey, myCert, theirCert, password)
-    expect(1, data, "string")
-    expect(2, myKey, "string")
-    expect(3, myCert, "string")
-    expect(4, theirCert, "string")
-    expect(5, password, "string", "nil")
+    checkArg(1, data, "string")
+    checkArg(2, myKey, "string")
+    checkArg(3, myCert, "string")
+    checkArg(4, theirCert, "string")
+    checkArg(5, password, "string", "nil")
     local pk8, typ = container.decodePEM(myKey)
     if typ == "ENCRYPTED PRIVATE KEY" then
         if not password then error("Private key is encrypted, but no password was provided", 2) end
@@ -220,10 +219,10 @@ end
 ---@param additionalCerts? string[] Any additional certificates needed to verify the signature (e.g. CA certificates)
 ---@return string sig The generated signature, PEM-encoded
 function libcert.sign(cert, key, data, additionalCerts)
-    expect(1, cert, "string", "table")
-    expect(2, key, "string", "table")
-    expect(3, data, "string")
-    expect(4, additionalCerts, "table", "nil")
+    checkArg(1, cert, "string", "table")
+    checkArg(2, key, "string", "table")
+    checkArg(3, data, "string")
+    checkArg(4, additionalCerts, "table", "nil")
     if additionalCerts then
         for i, v in ipairs(additionalCerts) do additionalCerts[i] = container.loadX509(container.decodePEM(v)) end
     end
@@ -242,11 +241,11 @@ end
 ---@return string|nil reason If not valid, a reason why it's invalid
 function libcert.verify(sig, data, validateCertificate, rootPath, additionalRoots)
     if validateCertificate == nil then validateCertificate = true end
-    expect(1, sig, "string", "table")
-    expect(2, data, "string")
-    expect(3, validateCertificate, "boolean")
-    expect(4, rootPath, "string", "nil")
-    expect(5, additionalRoots, "table", "nil")
+    checkArg(1, sig, "string", "table")
+    checkArg(2, data, "string")
+    checkArg(3, validateCertificate, "boolean")
+    checkArg(4, rootPath, "string", "nil")
+    checkArg(5, additionalRoots, "table", "nil")
     if type(sig) == "string" then sig = container.loadPKCS7(container.decodePEM(sig)) end
     local ok, err = signature.verify(sig, data)
     if not ok then return false, err end
@@ -265,10 +264,10 @@ end
 ---@return boolean trusted Whether the certificate can be trusted
 ---@return string|nil reason If not trusted, a reason why the certificate failed to validate
 function libcert.validate(cert, certList, rootPath, additionalRoots)
-    expect(1, cert, "string", "table")
-    expect(2, certList, "table", "nil")
-    expect(3, rootPath, "string", "nil")
-    expect(4, additionalRoots, "string", "nil")
+    checkArg(1, cert, "string", "table")
+    checkArg(2, certList, "table", "nil")
+    checkArg(3, rootPath, "string", "nil")
+    checkArg(4, additionalRoots, "string", "nil")
     if type(cert) == "string" then cert = container.loadX509(container.decodePEM(cert)) end
     if certList then for i, v in ipairs(certList) do if type(v) == "string" then certList[i] = container.loadX509(container.decodePEM(v)) end end end
     if additionalRoots then for i, v in ipairs(additionalRoots) do if type(v) == "string" then additionalRoots[i] = container.loadX509(container.decodePEM(v)) end end end

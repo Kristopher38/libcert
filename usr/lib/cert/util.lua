@@ -1,3 +1,5 @@
+local bit32 = require "bit32"
+
 local util = {}
 
 local band    = bit32.band

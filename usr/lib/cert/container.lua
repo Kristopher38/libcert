@@ -1,5 +1,4 @@
-local expect = require "system.expect"
-local serialization = require "system.serialization"
+local base64 = require "base64.base64"
 local asn1 = require "asn1"
 
 local container = {}
@@ -930,7 +929,7 @@ algorithm_list[container.passwordBasedEncryptionSchemeOIDs.PBES2] = {{"pbes2Para
 ---@return string type The type of the data as defined in the ASCII armor
 function container.decodePEM(data)
     local type = data:match("^%-%-%-%-%-BEGIN ([^%-]+)")
-    local retval = serialization.base64.decode(data:match("%-%-%-%-%-BEGIN [^%-]+%-%-%-%-%-\n(.+)\n%-%-%-%-%-END [^%-]+%-%-%-%-%-"):gsub("[^A-Za-z0-9/+=]", ""))
+    local retval = base64.decode(data:match("%-%-%-%-%-BEGIN [^%-]+%-%-%-%-%-\n(.+)\n%-%-%-%-%-END [^%-]+%-%-%-%-%-"):gsub("[^A-Za-z0-9/+=]", ""))
     return retval, type
 end
 
@@ -942,7 +941,7 @@ function container.encodePEM(data, type)
     return ([[-----BEGIN %s-----
 %s
 -----END %s-----
-]]):format(type, serialization.base64.encode(data):gsub(("."):rep(64), "%0\n"), type)
+]]):format(type, base64.encode(data):gsub(("."):rep(64), "%0\n"), type)
 end
 
 --- Loads a PKCS#7 file from DER.

@@ -1,6 +1,6 @@
 local container = require "container"
 local chain = require "chain"
-local util = require "cert.util"
+local util = require "util"
 local sha2 = require "sha2"
 local ed25519 = require "ccryptolib.ed25519"
 

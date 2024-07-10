@@ -1,8 +1,7 @@
-local expect = require "system.expect"
-local filesystem = require "system.filesystem"
+local filesystem = require "filesystem"
 local ed25519 = require "ccryptolib.ed25519"
 local container = require "container"
-local util = require "cert.util"
+local util = require "util"
 
 local chain = {}
 
@@ -45,18 +44,18 @@ end
 ---@return boolean trusted Whether the certificate can be trusted
 ---@return string|nil reason If not trusted, a reason why the certificate failed to validate
 function chain.validate(cert, certList, rootPath, additionalRoots)
-    expect(1, cert, "table")
-    expect(2, certList, "table", "nil")
-    rootPath = expect(3, rootPath, "string", "nil") or "/etc/certs"
-    expect(4, additionalRoots, "table", "nil")
+    checkArg(1, cert, "table")
+    checkArg(2, certList, "table", "nil")
+    rootPath = checkArg(3, rootPath, "string", "nil") or "/etc/certs"
+    checkArg(4, additionalRoots, "table", "nil")
     local roots = {}
     if additionalRoots then
         for _, v in ipairs(additionalRoots) do roots[#roots+1] = v end
     end
-    if rootPath ~= "" and filesystem.isDir(rootPath) then
-        for _, p in ipairs(filesystem.list(rootPath)) do
-            if filesystem.isFile(filesystem.combine(rootPath, p)) then
-                local file = io.open(filesystem.combine(rootPath, p), "rb")
+    if rootPath ~= "" and filesystem.isDirectory(rootPath) then
+        for p in filesystem.list(rootPath) do
+            if not filesystem.isDirectory(filesystem.concat(rootPath, p)) then
+                local file = io.open(filesystem.concat(rootPath, p), "rb")
                 if file then
                     local data = file:read("*a")
                     file:close()

@@ -1,4 +1,3 @@
-local expect = require "system.expect"
 local container = require "container"
 local ed25519 = require "ccryptolib.ed25519"
 local x25519 = require "ccryptolib.x25519"
@@ -11,9 +10,9 @@ local csr = {}
 ---@param attrs? Attribute[] Any attributes to attach to the certificate request
 ---@return PKCS10 pk10 A PKCS#10 certificate signature request
 function csr.generate(pk8, name, attrs)
-    expect(1, pk8, "table")
-    expect(2, name, "table")
-    expect(3, attrs, "table", "nil")
+    checkArg(1, pk8, "table")
+    checkArg(2, name, "table")
+    checkArg(3, attrs, "table", "nil")
     local kt = pk8.privateKeyAlgorithm.type.string or pk8.privateKeyAlgorithm.type
     local pub
     if kt == container.signatureAlgorithmOIDs.ED25519 then pub = ed25519.publicKey(pk8.privateKey)
@@ -46,11 +45,11 @@ end
 ---@param csrPublicKey? string If the CSR is for X25519 encryption, this must be the Ed25519 public key that was used for signing the CSR
 ---@return X509 outcert The new certificate for the request
 function csr.sign(pk10, cert, pk8, serialNumber, days, csrPublicKey)
-    expect(1, pk10, "table")
-    expect(2, cert, "table")
-    expect(3, pk8, "table")
-    expect(4, serialNumber, "number", "table")
-    expect(5, days, "number")
+    checkArg(1, pk10, "table")
+    checkArg(2, cert, "table")
+    checkArg(3, pk8, "table")
+    checkArg(4, serialNumber, "number", "table")
+    checkArg(5, days, "number")
     local kt = pk8.privateKeyAlgorithm.type.string or pk8.privateKeyAlgorithm.type
     if kt ~= container.signatureAlgorithmOIDs.ED25519 and kt ~= container.publicKeyAlgorithmOIDs.X25519 then error("Unsupported private key algorithm", 2) end
     kt = cert.toBeSigned.subjectPublicKeyInfo.algorithm.type.string or cert.toBeSigned.subjectPublicKeyInfo.algorithm.type
@@ -94,10 +93,10 @@ end
 ---@param days number The number of days the certificate is valid for
 ---@return X509 outcert The new certificate for the request
 function csr.selfSign(pk10, pk8, serialNumber, days)
-    expect(1, pk10, "table")
-    expect(2, pk8, "table")
-    expect(3, serialNumber, "number", "table")
-    expect(4, days, "number")
+    checkArg(1, pk10, "table")
+    checkArg(2, pk8, "table")
+    checkArg(3, serialNumber, "number", "table")
+    checkArg(4, days, "number")
     local kt = pk8.privateKeyAlgorithm.type.string or pk8.privateKeyAlgorithm.type
     if kt ~= container.signatureAlgorithmOIDs.ED25519 and kt ~= container.publicKeyAlgorithmOIDs.X25519 then error("Unsupported private key algorithm", 2) end
     kt = pk10.signatureAlgorithm.type.string or pk10.signatureAlgorithm.type

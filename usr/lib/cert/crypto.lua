@@ -1,5 +1,5 @@
 local container = require "container"
-local util = require "cert.util"
+local util = require "util"
 local chacha20 = require "ccryptolib.chacha20"
 local poly1305 = require "ccryptolib.poly1305"
 local random = require "ccryptolib.random"

@@ -1,0 +1,10 @@
+[submodule "usr/lib/base64"]
+	path = usr/lib/base64
+	url = https://github.com/iskolbin/lbase64.git
+[submodule "usr/lib/asn1"]
+	path = usr/lib/asn1
+	url = https://github.com/Phoenix-ComputerCraft/lua-asn1.git
+[submodule "usr/lib/ccryptolib"]
+	path = usr/lib/ccryptolib
+	url = git@github.com:Kristopher38/ccryptolib.git
+	branch = opencomputers
